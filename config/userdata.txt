@@ -1,4 +1,31 @@
 #!/bin/bash
 
-sudo apt-get update -y && sudo apt-get upgrade -y
-mkdir /home/ubuntu/testing
+echo "Welcome to Pagerduty on call reporting installation."
+echo "===================================================="
+
+yum update
+
+echo "Installing Go Lang..."
+yum install golang -y
+echo "Installing make..."
+yum install make -y
+echo "Installing git..."
+yum install git -y
+echo "Installing mailx"
+yum install mailx -y
+
+echo "===================================================="
+echo "change working directory to /home/ec2-user"
+cd /home/ec2-user
+echo "Clone reporting application from repo"
+git clone https://github.com/form3tech-oss/go-pagerduty-oncall-report.git
+echo "Rename directory"
+mv go-pagerduty-oncall-report pagerduty-oncall-report
+echo "Create directory schedules and teams (will contain all teams' schedules"
+cd pagerduty-oncall-report
+make
+echo "Creating folders"
+mkdir schedule-configs
+mkdir team-reports
+echo "Installation complete. Please check configuration documentation at https://checkout.atlassian.net/wiki/spaces/CSD/pages/4693427116/2+Configuration."
+echo "End of installation."

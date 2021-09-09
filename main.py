@@ -1,11 +1,13 @@
 import boto3, base64
 from time import sleep
-
-from pkg_resources import require
+import config.instance_config as InstanceConfigs
 
 ######################################
 ############ My Functions ############
 ######################################
+
+#TODO("Attach IAM role to spot instance which has access to the KMS")
+# TODO(Fetch API key from KMS)
 
 def require_custom_user_data_64():
 
@@ -26,47 +28,11 @@ def create_spot_instance(client):
     response = client.request_spot_instances(
         InstanceCount=1,
         Type='one-time',
-        LaunchSpecification={
-            'ImageId': 'ami-08bac620dc84221eb',
-            'KeyName': 'mervin-aws-playground',
-            'InstanceType': 't3.large',
-            'Placement': {
-                'AvailabilityZone': 'eu-west-1c',
-            },
-            'BlockDeviceMappings': [
-                {
-                    'DeviceName': '/dev/sda1',
-                    'Ebs': {
-                        'VolumeSize': 500,
-                        'DeleteOnTermination': True,
-                        'VolumeType': 'gp3',
-                        'Iops': 300,
-                        'Encrypted': False
-                    },
-                },
-            ],
-            'EbsOptimized': True,
-            'Monitoring': {
-                'Enabled': False
-            },
-            'SecurityGroupIds': [
-                'sg-0ad89907670b9b627',
-            ],
-            'UserData': require_custom_user_data_64()
-        },
+        LaunchSpecification=InstanceConfigs.require_instance_launch_specifications(require_custom_user_data_64()),
         TagSpecifications=[
         {
             'ResourceType': 'spot-instances-request',
-            'Tags': [
-                {
-                    'Key': 'Name',
-                    'Value': 'pager-duty-reporting'
-                },
-                {
-                    'Key': 'CreatorName',
-                    'Value': 'mervin.hemaraju@checkout.com'
-                },
-            ]
+            'Tags': InstanceConfigs.SPECS_INSTANCE_LAUNCH_TAGS
         },
     ],
     InstanceInterruptionBehavior='terminate'
